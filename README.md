@@ -7,6 +7,16 @@
 
 The project manages common local dependencies such as Redis, MySQL, MongoDB, and PostgreSQL, including separate testing variants where needed.
 
+## Preview
+
+### Web UI
+
+![serman web ui](./docs/webshot.png)
+
+### Terminal UI
+
+![serman tui](./docs/tuishot.png)
+
 ## What It Does
 
 - Starts, stops, restarts, and recreates local services
