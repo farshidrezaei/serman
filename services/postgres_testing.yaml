@@ -1,0 +1,25 @@
+services:
+  postgres_testing:
+    image: postgres:18.3
+    container_name: ${PROJECT_NAME}-postgres_testing
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_TESTING_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_TESTING_DB}
+      POSTGRES_USER: ${POSTGRES_TESTING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_TESTING_PASSWORD}
+    tmpfs:
+      - /var/lib/postgresql:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_TESTING_USER} -d ${POSTGRES_TESTING_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "10"
+    networks:
+      - local-network

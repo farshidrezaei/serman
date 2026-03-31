@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:8.6.1-alpine
+    restart: unless-stopped
+    container_name: ${PROJECT_NAME}-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "10"
+    networks:
+      - local-network

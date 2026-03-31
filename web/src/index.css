@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.neon-ring {
+  box-shadow: 0 0 0 1px rgba(0, 255, 156, 0.25), 0 0 40px rgba(0, 255, 156, 0.15);
+}
+
+.grid-glow {
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(0, 255, 156, 0.12), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(255, 255, 255, 0.08), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(0, 255, 156, 0.08), transparent 55%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%);
+}
+
+.scanline {
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}

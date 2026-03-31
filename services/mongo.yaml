@@ -1,0 +1,24 @@
+services:
+  mongo:
+    image: mongo:8.2.5-noble
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: '${MONGODB_USERNAME}'
+      MONGO_INITDB_ROOT_PASSWORD: '${MONGODB_PASSWORD}'
+      MONGO_INITDB_DATABASE: '${MONGODB_DATABASE}'
+    ports:
+      - '${MONGODB_PORT}:27017'
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username ${MONGODB_USERNAME} --password ${MONGODB_PASSWORD} --authenticationDatabase admin --eval 'db.adminCommand(\"ping\")'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "10"
+    networks:
+      - local-network

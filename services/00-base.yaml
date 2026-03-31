@@ -1,0 +1,9 @@
+networks:
+  local-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  mysql_data:
+  mongo_data:
+  postgres_data:

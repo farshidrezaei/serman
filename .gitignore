@@ -7,3 +7,6 @@
 /redis/data
 /redis/data/*
 .env
+stackctl
+stackctl.exe
+/web/node_modules
