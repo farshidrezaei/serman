@@ -548,13 +548,15 @@ func getComposeServices(root string) ([]ServiceStatus, error) {
 	if len(known) == 0 {
 		known = knownServiceNames()
 	}
+	knownSet := make(map[string]struct{}, len(known))
+	for _, name := range known {
+		knownSet[name] = struct{}{}
+	}
+	projectName := composeProjectName(root)
 
 	statusByName := map[string]ServiceStatus{}
 	for _, e := range entries {
-		name := stringField(e, "Service")
-		if name == "" {
-			name = stringField(e, "Name")
-		}
+		name := detectComposeServiceName(e, knownSet, projectName)
 		if name == "" {
 			continue
 		}
@@ -582,6 +584,70 @@ func getComposeServices(root string) ([]ServiceStatus, error) {
 		return res[i].Name < res[j].Name
 	})
 	return res, nil
+}
+
+func composeProjectName(root string) string {
+	env, err := LoadEnvFile(filepath.Join(root, ".env"))
+	if err == nil {
+		if projectName, ok := env.Get("NAMESPACE"); ok {
+			return strings.TrimSpace(projectName)
+		}
+	}
+	return ""
+}
+
+func detectComposeServiceName(entry map[string]interface{}, known map[string]struct{}, projectName string) string {
+	if name := strings.TrimSpace(stringField(entry, "Service")); name != "" {
+		return name
+	}
+	if name := strings.TrimSpace(composeServiceLabel(entry)); name != "" {
+		return name
+	}
+	if name := strings.TrimSpace(stringField(entry, "Name")); name != "" {
+		if _, ok := known[name]; ok {
+			return name
+		}
+		if projectName != "" {
+			prefix := projectName + "-"
+			if strings.HasPrefix(name, prefix) {
+				trimmed := strings.TrimPrefix(name, prefix)
+				if _, ok := known[trimmed]; ok {
+					return trimmed
+				}
+			}
+		}
+		for knownName := range known {
+			if name == knownName || strings.HasSuffix(name, "-"+knownName) || strings.HasSuffix(name, "_"+knownName) {
+				return knownName
+			}
+		}
+	}
+	return ""
+}
+
+func composeServiceLabel(entry map[string]interface{}) string {
+	labels, ok := entry["Labels"]
+	if !ok {
+		return ""
+	}
+	switch v := labels.(type) {
+	case map[string]interface{}:
+		if raw, ok := v["com.docker.compose.service"]; ok {
+			if s, ok := raw.(string); ok {
+				return s
+			}
+		}
+	case map[string]string:
+		return v["com.docker.compose.service"]
+	case string:
+		for _, part := range strings.Split(v, ",") {
+			part = strings.TrimSpace(part)
+			if strings.HasPrefix(part, "com.docker.compose.service=") {
+				return strings.TrimPrefix(part, "com.docker.compose.service=")
+			}
+		}
+	}
+	return ""
 }
 
 func readServiceConfig(root, service string) (serviceConfigResponse, error) {
@@ -770,6 +836,20 @@ func resolveComposeFiles(root string) ([]string, error) {
 		name := entry.Name()
 		if strings.HasSuffix(name, ".yaml") {
 			files = append(files, filepath.Join(dir, name))
+		}
+	}
+	localDir := filepath.Join(dir, "local")
+	localEntries, err := os.ReadDir(localDir)
+	if err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+	for _, entry := range localEntries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if strings.HasSuffix(name, ".yaml") {
+			files = append(files, filepath.Join(localDir, name))
 		}
 	}
 	if len(files) == 0 {

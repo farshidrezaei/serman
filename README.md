@@ -167,31 +167,31 @@ Configuration lives in [.env](./.env). If it does not exist, create it from [.en
 Example:
 
 ```env
-PROJECT_NAME=services
+NAMESPACE=services
 
 REDIS_PORT=6379
 REDIS_PASSWORD=password
 
 MYSQL_PORT=3306
-MYSQL_DATABASE="${PROJECT_NAME}-db"
-MYSQL_USER="${PROJECT_NAME}-user"
+MYSQL_DATABASE="${NAMESPACE}-db"
+MYSQL_USER="${NAMESPACE}-user"
 MYSQL_PASSWORD=password
 MYSQL_ROOT_PASSWORD=password
 
 MONGODB_PORT=27017
-MONGODB_DATABASE="${PROJECT_NAME}-db"
-MONGODB_USERNAME="${PROJECT_NAME}-user"
+MONGODB_DATABASE="${NAMESPACE}-db"
+MONGODB_USERNAME="${NAMESPACE}-user"
 MONGODB_PASSWORD=password
 
 POSTGRES_PORT=5432
-POSTGRES_DB="${PROJECT_NAME}-db"
-POSTGRES_USER="${PROJECT_NAME}-user"
+POSTGRES_DB="${NAMESPACE}-db"
+POSTGRES_USER="${NAMESPACE}-user"
 POSTGRES_PASSWORD=password
 ```
 
 Important:
 
-- `PROJECT_NAME` must be set, or Compose names will be invalid
+- `NAMESPACE` must be set, or Compose names will be invalid
 - service actions load `.env` explicitly from the repo root
 - config edits in the web UI and TUI both write back to `.env`
 
@@ -208,6 +208,26 @@ Examples:
 - [services/postgres.yaml](./services/postgres.yaml)
 
 The web and TUI layers assemble these fragments dynamically when calling Docker Compose.
+
+## Local Extra Services
+
+If you want to add extra services without committing them, put additional Compose fragments in `services/local/`.
+
+- files in `services/` remain tracked project defaults
+- files in `services/local/` are loaded automatically by `serman`
+- `services/local/` is ignored by git
+
+Example:
+
+```text
+services/
+  00-base.yaml
+  redis.yaml
+  local/
+    mailhog.yaml
+```
+
+Any `*.yaml` file in `services/local/` can define extra services, volumes, or other Compose fragments for your machine only.
 
 ## Fresh Recreate
 
@@ -268,7 +288,7 @@ If `:8080` cannot be bound, the web server will fail to start. This is usually a
 
 ## Troubleshooting
 
-### `PROJECT_NAME` is empty
+### `NAMESPACE` is empty
 
 Symptom:
 
@@ -279,7 +299,7 @@ Invalid container name (-postgres)
 Cause:
 
 - `.env` is missing
-- `PROJECT_NAME` is blank
+- `NAMESPACE` is blank
 
 Fix:
 
@@ -290,7 +310,7 @@ cp .env.example .env
 Then confirm:
 
 ```bash
-grep '^PROJECT_NAME=' .env
+grep '^NAMESPACE=' .env
 ```
 
 ### PostgreSQL fails after image upgrade

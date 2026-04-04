@@ -1,7 +1,7 @@
 services:
   postgres_testing:
     image: postgres:18.3
-    container_name: ${PROJECT_NAME}-postgres_testing
+    container_name: ${NAMESPACE}-postgres_testing
     restart: unless-stopped
     ports:
       - "${POSTGRES_TESTING_PORT}:5432"
